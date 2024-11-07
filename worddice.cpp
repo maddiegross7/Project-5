@@ -29,7 +29,8 @@ public:
     Node() 
         :
           letters(26, false),  // 26 spots for each letter of the alphabet
-          visited(0)  {}
+          visited(0),
+          backEdge(nullptr)  {}
 };
 
 class Graph {
@@ -40,8 +41,37 @@ public:
 
     int BFS();
     int canISpell();
-    void deleteHalfGraph();
+    void deleteHalfGraph() {
+        //delete word nodes
+        for (int i = nodes.size() - 1; i >= minNodes; i--) {
+
+            for (Edge* edge : nodes[i]->adj) {
+                delete edge;
+            }
+            nodes[i]->adj.clear();
+
+            if (nodes[i]->backEdge != nullptr) {
+                delete nodes[i]->backEdge;
+            }
+
+            delete nodes[i];
+            nodes[i] = nullptr;
+
+            nodes.erase(nodes.begin() + i);
+        }
+
+        //delete edges from dice nodes
+        for(int i = 0; i < nodes.size(); i++){
+            if(nodes[i]->type == dice){
+                for (Edge* edge : nodes[i]->adj) {
+                    delete edge;
+                }   
+                nodes[i]->adj.clear();
+            }
+        }
+    }
 };
+
 
 int main(int argc, char *argv[]) {
 
@@ -53,9 +83,6 @@ int main(int argc, char *argv[]) {
     string diceFile = argv[1];
     string wordFile = argv[2];
     int nodeIndex=0;
-
-    cout << "dice: " << diceFile << endl;
-    cout << "words: " << wordFile << endl;
 
     Graph ourGraph;
     Node *source = new Node;
@@ -75,7 +102,6 @@ int main(int argc, char *argv[]) {
     string line;
     while (getline(fin, line)) {
         nodeIndex++;
-        cout << line << endl;
         Node *ourDice = new Node;;
         ourDice->id = nodeIndex;
         ourDice->type = dice;
@@ -95,9 +121,6 @@ int main(int argc, char *argv[]) {
         ourGraph.minNodes++;
     }
 
-    cout << ourGraph.nodes.size() << endl;
-    cout << "count of nodes" << ourGraph.minNodes << endl;
-
     fin.close();
 
     fin.open(wordFile);
@@ -105,13 +128,13 @@ int main(int argc, char *argv[]) {
     if(!fin.is_open()){
 		cerr << "Could not open: " << wordFile << endl;
 	}
-
+    
     while(getline(fin, line)){
+        nodeIndex = ourGraph.minNodes;
         Node *ourSink = new Node();
         ourSink->type = sink;
         for(int i = 0; i < line.length(); i++){
             nodeIndex++;
-            cout << line[i] << endl;
             Node *aLetter = new Node();
             aLetter->id = nodeIndex;
             aLetter->type = word;
@@ -135,16 +158,24 @@ int main(int argc, char *argv[]) {
         //Now I am gonna print out the graph to make sure it looks right
 
         for(int i = 0; i < ourGraph.nodes.size(); i++){
-            cout << "Node " << i << " type: " << ourGraph.nodes[i]->type << " Edges to " ;
+            cout << "Node " << i << " ";
+            for(int j = 0; j < ourGraph.nodes[i]->letters.size(); j++){
+                if(ourGraph.nodes[i]->letters[j]){
+                    char letter = 'A' + j;
+                    cout << letter ;
+                }
+            }
+            cout << " Edges to " ;
             for(int j = 0; j < ourGraph.nodes[i]->adj.size(); j++){
                 cout << ourGraph.nodes[i]->adj[j]->to->id << " " ;
             }
             cout << endl;
         }
 
-        //need to delete now the letters and the sink at the end of this loop every time
-        //we can use the function in the class if we want but idk it we want to; we might want to use at the 
-        //end to delete all of it but can play around with it and see
+        //This is where we should do the BFS and path finding
+    
+        ourGraph.deleteHalfGraph();
+
     }
 
     return 0;
