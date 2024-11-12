@@ -1,0 +1,59 @@
+Node 0  Edges to 1 2 3 4 
+Node 1 EGN Edges to 7 8 
+Node 2 AS Edges to 6 
+Node 3 PR Edges to 5 
+Node 4 AE Edges to 6 8 
+Node 5 R Edges to 9 
+Node 6 A Edges to 9 
+Node 7 G Edges to 9 
+Node 8 E Edges to 9 
+Node 9  Edges to 
+
+
+Node 0  Edges to 1 2 3 4 
+Node 1 EGN Edges to 6 7 
+Node 2 AS Edges to 5 
+Node 3 PR Edges to 8 
+Node 4 AE Edges to 6 7 
+Node 5 S Edges to 9 
+Node 6 E Edges to 9 
+Node 7 E Edges to 9 
+Node 8 P Edges to 9 
+Node 9  Edges to 
+
+
+Node 0  Edges to 1 2 3 4 
+Node 1 EGN Edges to 5 
+Node 2 AS Edges to 
+Node 3 PR Edges to 6 7 
+Node 4 AE Edges to 5 
+Node 5 E Edges to 8 
+Node 6 R Edges to 8 
+Node 7 R Edges to 8 
+Node 8  Edges to 
+
+
+Node 0  Edges to 1 2 3 4 
+Node 1 EGN Edges to 6 7 8 
+Node 2 AS Edges to 
+Node 3 PR Edges to 5 
+Node 4 AE Edges to 6 7 
+Node 5 P Edges to 9 
+Node 6 E Edges to 9 
+Node 7 E Edges to 9 
+Node 8 N Edges to 9 
+Node 9  Edges to 
+
+
+Node 0  Edges to 1 2 3 4 
+Node 1 EGN Edges to 5 
+Node 2 AS Edges to 6 7 
+Node 3 PR Edges to 8 
+Node 4 AE Edges to 6 
+Node 5 G Edges to 9 
+Node 6 A Edges to 9 
+Node 7 S Edges to 9 
+Node 8 P Edges to 9 
+Node 9  Edges to 
+
+

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <queue>
 
 using namespace std;
 
@@ -38,9 +39,44 @@ public:
     vector<Node*> nodes;
     vector<int> spellingIds;
     int minNodes=0;
+    
+    //okay gotta make this work all the way and not just till 
+    //we find a route
+    int BFS(){
+        queue<Node*> q;
+        Node* ourSource = nodes[0];
+        ourSource->visited = 1;
 
-    int BFS();
+        q.push(ourSource);
+
+        while (!q.empty()){
+            Node* current = q.front();
+            q.pop();
+
+            for(int i = 0; i < current->adj.size(); i++){
+                Node* next = current->adj[i]->to;
+
+                //let it work if someday the flow is not just 1
+                if(!next->visited && (current->adj[i]->original - current->adj[i]->residual) > 0){
+                    next->visited = 1;
+                    next->backEdge = current->adj[i];
+                    current->adj[i]->original = 0;
+                    current->adj[i]->residual = 1;
+                    q.push(next);
+                    cout << current->id << " to " << next->id << endl;
+
+                    // if(next->type == sink){
+                    //     return 1;
+                    // }
+                }
+            }
+        }
+        return 0;
+        
+    }
+
     int canISpell();
+
     void deleteHalfGraph() {
         //delete word nodes
         for (int i = nodes.size() - 1; i >= minNodes; i--) {
@@ -51,7 +87,7 @@ public:
             nodes[i]->adj.clear();
 
             if (nodes[i]->backEdge != nullptr) {
-                delete nodes[i]->backEdge;
+                nodes[i]->backEdge = nullptr;
             }
 
             delete nodes[i];
@@ -69,8 +105,21 @@ public:
                 nodes[i]->adj.clear();
             }
         }
+
+        for(int i = 0; i < nodes.size(); i++){
+            nodes[i]->backEdge = nullptr;
+            nodes[i]->visited = 0;
+        }
+
+        for(int i = 0; i < nodes[0]->adj.size(); i++){
+            nodes[0]->adj[i]->original = 1;
+            nodes[0]->adj[i]->residual = 0;
+            //nodes[0]->adj[i].
+        }
     }
 };
+
+
 
 
 int main(int argc, char *argv[]) {
@@ -102,7 +151,7 @@ int main(int argc, char *argv[]) {
     string line;
     while (getline(fin, line)) {
         nodeIndex++;
-        Node *ourDice = new Node;;
+        Node *ourDice = new Node;
         ourDice->id = nodeIndex;
         ourDice->type = dice;
         for(int i=0; i < line.length(); i++){
@@ -134,13 +183,24 @@ int main(int argc, char *argv[]) {
         Node *ourSink = new Node();
         ourSink->type = sink;
         for(int i = 0; i < line.length(); i++){
-            nodeIndex++;
             Node *aLetter = new Node();
             aLetter->id = nodeIndex;
             aLetter->type = word;
             char letter = line[i];
             int diff = letter - 'A';
             aLetter->letters[diff]=true;
+            nodeIndex++;
+
+            for(int j = 1; j < ourGraph.minNodes; j++){
+                if(ourGraph.nodes[j]->letters[diff] == true){
+                    Edge *toWord = new Edge;
+                    toWord->to = aLetter;
+                    toWord->from = ourGraph.nodes[j-1];
+                    toWord->residual = 0;
+                    toWord->original = 1;
+                    ourGraph.nodes[j]->adj.push_back(toWord);
+                }
+            }
 
             Edge *toSink = new Edge;
             toSink->from = aLetter;
@@ -152,7 +212,7 @@ int main(int argc, char *argv[]) {
 
             ourGraph.nodes.push_back(aLetter);
         }
-        ourSink->id = nodeIndex + 1;
+        ourSink->id = nodeIndex;
         ourGraph.nodes.push_back(ourSink);
 
         //Now I am gonna print out the graph to make sure it looks right
@@ -169,10 +229,18 @@ int main(int argc, char *argv[]) {
             for(int j = 0; j < ourGraph.nodes[i]->adj.size(); j++){
                 cout << ourGraph.nodes[i]->adj[j]->to->id << " " ;
             }
-            cout << endl;
+            cout << endl ;
         }
+        cout << endl << endl;
 
         //This is where we should do the BFS and path finding
+
+        while(ourGraph.BFS() == 1){
+            cout << "path found" << endl;
+            
+        }     
+
+
     
         ourGraph.deleteHalfGraph();
 
