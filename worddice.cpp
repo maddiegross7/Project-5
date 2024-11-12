@@ -18,117 +18,120 @@ public:
 };
 
 class Node {
-public:
-    int id;
-    node_type type;
-    vector<bool> letters;
-    int visited;
-    vector<Edge*> adj;
-    Edge *backEdge;
-
-    // Constructor
-    Node() 
-        :
-          letters(26, false),  // 26 spots for each letter of the alphabet
-          visited(0),
-          backEdge(nullptr),
-          id(NULL)  {}
+    public:
+        int id;
+        node_type type;
+        vector<bool> letters;
+        int visited;
+        vector<Edge*> adj;
+        Edge *backEdge;
+        Node();   
 };
+
+Node::Node(){
+    letters.assign(26, false); // 26 spots for each letter of the alphabet
+    visited = 0;
+    backEdge = nullptr;
+    id = NULL;
+}
 
 class Graph {
-public:
-    vector<Node*> nodes;
-    vector<int> spellingIds;
-    int minNodes=0;
-    
-    //okay gotta make this work all the way and not just till 
-    //we find a route
-    int BFS(){
-        queue<Node*> q;
-        Node* ourSource = nodes[0];
-        for(int i = 0; i < nodes.size(); i++){
-            nodes[i]->visited = 0;
-            nodes[i]->backEdge = nullptr;
-        }
-        ourSource->visited = 1;
-
-        q.push(ourSource);
-
-        while (!q.empty()){
-            Node* current = q.front();
-            q.pop();
-
-            for(int i = 0; i < current->adj.size(); i++){
-                Node* next = current->adj[i]->to;
-
-                //let it work if someday the flow is not just 1
-                if(!next->visited &&(current->adj[i]->original - current->adj[i]->residual) > 0){
-                    next->visited = 1;
-                    next->backEdge = current->adj[i];
-                    
-                    q.push(next);
-                    
-
-                    if(next->type == sink){
-                        return 1;
-                    }
-                }//else if the reverse has some kind of original flow then add that to the q maybe?
-                
-            }
-        }
-        return 0;
-        
-    }
-
-    int canISpell(){
-        while(BFS() == 1){
-            Node* sink = nodes.back();
-            cout << sink->id;
-            while(sink->type != src){
-                sink->backEdge->original = 0;
-                sink->backEdge->residual = 1;
-                sink->backEdge->reverse->original = 1;
-                sink->backEdge->reverse->residual = 0;
-                sink = sink->backEdge->from;
-                cout << " to " << sink->id;
-            }
-            cout <<  endl;
-        }
-    }
-
-    void deleteHalfGraph() {
-        //delete word nodes
-        for (int i = nodes.size() - 1; i >= minNodes; i--) {
-            Node* node = nodes[i];
-            for (Edge* edge : node->adj) {
-                delete edge->reverse;
-                delete edge;
-            }
-            delete node;
-            nodes.erase(nodes.begin() + i);
-        }
-
-        //delete edges from dice nodes
-        for(int i = 0; i < nodes.size(); i++){
-            if(nodes[i]->type == dice){
-                for (Edge* edge : nodes[i]->adj) {
-                    delete edge;
-                }   
-                nodes[i]->adj.clear();
-            }
-        }
-
-        for(int i = 0; i < nodes.size(); i++){
-            nodes[i]->backEdge = nullptr;
-            nodes[i]->visited = 0;
-        }
-
-        for(int i = 0; i < nodes[0]->adj.size(); i++){
-            nodes[0]->adj[i]->original = 1;
-            nodes[0]->adj[i]->residual = 0;
-        }
-    }
+    public:
+        vector<Node*> nodes;
+        vector<int> spellingIds;
+        int minNodes=0;
+        int BFS();
+        int canISpell();
+        void deleteHalfGraph();
 };
+
+//okay gotta make this work all the way and not just till 
+//we find a route
+int Graph::BFS(){
+    queue<Node*> q;
+    Node* ourSource = nodes[0];
+    for(int i = 0; i < nodes.size(); i++){
+        nodes[i]->visited = 0;
+        nodes[i]->backEdge = nullptr;
+    }
+    ourSource->visited = 1;
+
+    q.push(ourSource);
+
+    while (!q.empty()){
+        Node* current = q.front();
+        q.pop();
+
+        for(int i = 0; i < current->adj.size(); i++){
+            Node* next = current->adj[i]->to;
+
+            //let it work if someday the flow is not just 1
+            if(!next->visited && (current->adj[i]->original - current->adj[i]->residual) > 0){
+                next->visited = 1;
+                next->backEdge = current->adj[i];
+                
+                q.push(next);
+                
+
+                if(next->type == sink){
+                    return 1;
+                }
+            }//else if the reverse has some kind of original flow then add that to the q maybe?
+
+        }
+    }
+    return 0;
+}
+
+int Graph::canISpell(){
+    while(BFS() == 1){
+        Node* sink = nodes.back();
+        //cout << sink->id;
+        while(sink->type != src){
+            sink->backEdge->original = 0;
+            sink->backEdge->residual = 1;
+            sink->backEdge->reverse->original = 1;
+            sink->backEdge->reverse->residual = 0;
+            sink = sink->backEdge->from;
+            //cout << " to " << sink->id;
+        }
+        //cout <<  endl;
+    }
+}
+
+void Graph::deleteHalfGraph() {
+    //delete word nodes
+    for (int i = nodes.size() - 1; i >= minNodes; i--) {
+        Node* node = nodes[i];
+        for (Edge* edge : node->adj) {
+            //delete edge->reverse;
+            edge->reverse=nullptr;
+            delete edge;
+        }
+        delete node;
+        nodes.erase(nodes.begin() + i);
+    }
+
+    //delete edges from dice nodes
+    for(int i = 0; i < nodes.size(); i++){
+        if(nodes[i]->type == dice){
+            for (Edge* edge : nodes[i]->adj) {
+                delete edge;
+            }   
+            nodes[i]->adj.clear();
+        }
+    }
+
+    for(int i = 0; i < nodes.size(); i++){
+        nodes[i]->backEdge = nullptr;
+        nodes[i]->visited = 0;
+    }
+
+    for(int i = 0; i < nodes[0]->adj.size(); i++){
+        nodes[0]->adj[i]->original = 1;
+        nodes[0]->adj[i]->residual = 0;
+    }
+}
 
 int main(int argc, char *argv[]) {
 
@@ -183,6 +186,7 @@ int main(int argc, char *argv[]) {
 
         ourDice->backEdge = fromSource; //is this going the right direction? Do we need this yet? do we want this yet?
         source->adj.push_back(fromSource);
+        //source->adj.push_back(toSource);
         ourGraph.nodes.push_back(ourDice);
         ourGraph.minNodes++;
     }
@@ -224,6 +228,7 @@ int main(int argc, char *argv[]) {
 
                     toWord->reverse = toDice;
                     ourGraph.nodes[j]->adj.push_back(toWord);
+                    //ourGraph.nodes[j]->adj.push_back(toDice);
                 }
             }
 
@@ -242,6 +247,7 @@ int main(int argc, char *argv[]) {
             toSink->reverse = fromSink;
 
             aLetter->adj.push_back(toSink);
+            //aLetter->adj.push_back(fromSink);
 
             ourGraph.nodes.push_back(aLetter);
         }
