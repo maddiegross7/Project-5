@@ -31,7 +31,8 @@ public:
         :
           letters(26, false),  // 26 spots for each letter of the alphabet
           visited(0),
-          backEdge(nullptr)  {}
+          backEdge(nullptr),
+          id(NULL)  {}
 };
 
 class Graph {
@@ -45,6 +46,10 @@ public:
     int BFS(){
         queue<Node*> q;
         Node* ourSource = nodes[0];
+        for(int i = 0; i < nodes.size(); i++){
+            nodes[i]->visited = 0;
+            nodes[i]->backEdge = nullptr;
+        }
         ourSource->visited = 1;
 
         q.push(ourSource);
@@ -57,42 +62,49 @@ public:
                 Node* next = current->adj[i]->to;
 
                 //let it work if someday the flow is not just 1
-                if(!next->visited && (current->adj[i]->original - current->adj[i]->residual) > 0){
+                if(!next->visited &&(current->adj[i]->original - current->adj[i]->residual) > 0){
                     next->visited = 1;
                     next->backEdge = current->adj[i];
-                    current->adj[i]->original = 0;
-                    current->adj[i]->residual = 1;
+                    
                     q.push(next);
-                    cout << current->id << " to " << next->id << endl;
+                    
 
-                    // if(next->type == sink){
-                    //     return 1;
-                    // }
-                }
+                    if(next->type == sink){
+                        return 1;
+                    }
+                }//else if the reverse has some kind of original flow then add that to the q maybe?
+                
             }
         }
         return 0;
         
     }
 
-    int canISpell();
+    int canISpell(){
+        while(BFS() == 1){
+            Node* sink = nodes.back();
+            cout << sink->id;
+            while(sink->type != src){
+                sink->backEdge->original = 0;
+                sink->backEdge->residual = 1;
+                sink->backEdge->reverse->original = 1;
+                sink->backEdge->reverse->residual = 0;
+                sink = sink->backEdge->from;
+                cout << " to " << sink->id;
+            }
+            cout <<  endl;
+        }
+    }
 
     void deleteHalfGraph() {
         //delete word nodes
         for (int i = nodes.size() - 1; i >= minNodes; i--) {
-
-            for (Edge* edge : nodes[i]->adj) {
+            Node* node = nodes[i];
+            for (Edge* edge : node->adj) {
+                delete edge->reverse;
                 delete edge;
             }
-            nodes[i]->adj.clear();
-
-            if (nodes[i]->backEdge != nullptr) {
-                nodes[i]->backEdge = nullptr;
-            }
-
-            delete nodes[i];
-            nodes[i] = nullptr;
-
+            delete node;
             nodes.erase(nodes.begin() + i);
         }
 
@@ -114,13 +126,9 @@ public:
         for(int i = 0; i < nodes[0]->adj.size(); i++){
             nodes[0]->adj[i]->original = 1;
             nodes[0]->adj[i]->residual = 0;
-            //nodes[0]->adj[i].
         }
     }
 };
-
-
-
 
 int main(int argc, char *argv[]) {
 
@@ -164,6 +172,15 @@ int main(int argc, char *argv[]) {
         fromSource->to = ourDice;
         fromSource->original = 1;
         fromSource->residual = 0;
+
+        Edge *toSource = new Edge;
+        toSource->from = ourDice;
+        toSource->to = source;
+        toSource->original = 0;
+        toSource->residual = 1;
+
+        fromSource->reverse = toSource;
+
         ourDice->backEdge = fromSource; //is this going the right direction? Do we need this yet? do we want this yet?
         source->adj.push_back(fromSource);
         ourGraph.nodes.push_back(ourDice);
@@ -198,6 +215,14 @@ int main(int argc, char *argv[]) {
                     toWord->from = ourGraph.nodes[j-1];
                     toWord->residual = 0;
                     toWord->original = 1;
+
+                    Edge *toDice = new Edge;
+                    toDice->from = aLetter;
+                    toDice->to = ourGraph.nodes[j-1];
+                    toDice->original = 0;
+                    toDice->residual = 1;
+
+                    toWord->reverse = toDice;
                     ourGraph.nodes[j]->adj.push_back(toWord);
                 }
             }
@@ -207,6 +232,14 @@ int main(int argc, char *argv[]) {
             toSink->to = ourSink;
             toSink->original = 1;
             toSink->residual = 0;
+
+            Edge *fromSink = new Edge;
+            fromSink->from = ourSink;
+            fromSink->to = aLetter;
+            fromSink->original = 1;
+            fromSink->residual = 0;
+
+            toSink->reverse = fromSink;
 
             aLetter->adj.push_back(toSink);
 
@@ -218,7 +251,7 @@ int main(int argc, char *argv[]) {
         //Now I am gonna print out the graph to make sure it looks right
 
         for(int i = 0; i < ourGraph.nodes.size(); i++){
-            cout << "Node " << i << " ";
+            cout << "Node " << ourGraph.nodes[i]->id << " ";
             for(int j = 0; j < ourGraph.nodes[i]->letters.size(); j++){
                 if(ourGraph.nodes[i]->letters[j]){
                     char letter = 'A' + j;
@@ -227,20 +260,15 @@ int main(int argc, char *argv[]) {
             }
             cout << " Edges to " ;
             for(int j = 0; j < ourGraph.nodes[i]->adj.size(); j++){
-                cout << ourGraph.nodes[i]->adj[j]->to->id << " " ;
+                cout << ourGraph.nodes[i]->adj[j]->to->id << " "  ;
             }
             cout << endl ;
         }
         cout << endl << endl;
 
         //This is where we should do the BFS and path finding
-
-        while(ourGraph.BFS() == 1){
-            cout << "path found" << endl;
-            
-        }     
-
-
+        //cout << " do we even get here? " << endl;
+        ourGraph.canISpell();    
     
         ourGraph.deleteHalfGraph();
 
