@@ -49,8 +49,8 @@ class Graph {
 //we find a route
 int Graph::BFS(){
     queue<Node*> q;
-    Node* ourSource = nodes[0];
-    cout << "we in the BFS" << endl;
+    Node *ourSource = nodes[0];
+    //cout << "we in the BFS" << endl;
     for(int i = 0; i < nodes.size(); i++){
         nodes[i]->visited = 0;
         nodes[i]->backEdge = nullptr;
@@ -60,11 +60,11 @@ int Graph::BFS(){
     q.push(ourSource);
 
     while (!q.empty()){
-        Node* current = q.front();
+        Node *current = q.front();
         q.pop();
 
         for(int i = 0; i < current->adj.size(); i++){
-            Node* next = current->adj[i]->to;
+            Node *next = current->adj[i]->to;
 
             //let it work if someday the flow is not just 1
             if(!next->visited && (current->adj[i]->original - current->adj[i]->residual) > 0){
@@ -85,13 +85,13 @@ int Graph::BFS(){
 }
 
 int Graph::canISpell(){
-    cout << "we in Can I Spell" << endl;
+    //cout << "we in Can I Spell" << endl;
     while(BFS() == 1){
         //cout << "nodes length " << nodes.size() << " " << endl;
-        Node* sink = nodes.back();
-        cout << "BFS = 1" << endl;
-        
-        cout << sink->type;
+        Node *sink = nodes.back();
+        //cout << "BFS = 1" << endl;
+        cout << sink->id;
+        //cout << sink->type;
         while(sink->type != src){
             sink->backEdge->original = 0;
             sink->backEdge->residual = 1;
@@ -105,48 +105,55 @@ int Graph::canISpell(){
 }
 
 void Graph::deleteHalfGraph() {
-    //delete word nodes
-    cout << "hello? " << endl;
+    // Step 1: Delete all word nodes and their edges
     for (int i = nodes.size() - 1; i >= minNodes; i--) {
-        Node* node = nodes[i];
-        for (Edge* edge : node->adj) {
-            //delete edge->reverse;
-            edge->reverse=nullptr;
+        Node *node = nodes[i];
+        
+        // Delete all edges attached to this word node
+        for (Edge *edge : node->adj) {
+            if (edge->reverse) {
+                edge->reverse->reverse = nullptr; // Unlink reverse edges
+            }
             delete edge;
         }
-        delete node;
-        nodes.erase(nodes.begin() + i);
+        
+        delete node; // Delete the word node
+        nodes.erase(nodes.begin() + i); // Remove node from the graph's node list
     }
-    cout << "deleting word nodes good" << endl;
 
-    //delete edges from dice nodes
-    for(int i = 0; i < nodes.size(); i++){
-        if(nodes[i]->type == dice){
-            for (Edge* edge : nodes[i]->adj) {
-                if(edge->to->type = word){
+    // Step 2: Remove edges in dice nodes that point to word nodes
+    for (Node *node : nodes) {
+        if (node->type == dice) {
+            // Filter out and delete edges pointing to word nodes
+            for (auto it = node->adj.begin(); it != node->adj.end(); ) {
+                Edge *edge = *it;
+                if (edge->to->type == word) {
+                    if (edge->reverse) {
+                        edge->reverse->reverse = nullptr; // Unlink reverse edge
+                        delete edge->reverse;
+                    }
                     delete edge;
+                    it = node->adj.erase(it); // Erase edge from adj list and advance iterator
+                } else {
+                    ++it; // Advance only if no deletion
                 }
-            }   
-            nodes[i]->adj.clear();
+            }
         }
     }
 
-    cout << "deleting edges from dice nodes" << endl;
-
-    for(int i = 0; i < nodes.size(); i++){
-        nodes[i]->backEdge = nullptr;
-        nodes[i]->visited = 0;
+    // Step 3: Reset the source node’s edges for the next search
+    for (Edge *edge : nodes[0]->adj) {
+        edge->original = 1;
+        edge->residual = 0;
     }
 
-    cout << "hmm is this the problem" << endl;
-
-    for(int i = 0; i < nodes[0]->adj.size(); i++){
-        nodes[0]->adj[i]->original = 1;
-        nodes[0]->adj[i]->residual = 0;
+    // Step 4: Reset any visited and backEdge properties for the remaining nodes
+    for (Node *node : nodes) {
+        node->visited = 0;
+        node->backEdge = nullptr;
     }
-
-    cout << "or this? " << endl;
 }
+
 
 int main(int argc, char *argv[]) {
 
@@ -206,6 +213,8 @@ int main(int argc, char *argv[]) {
         ourGraph.minNodes++;
     }
 
+    
+
     fin.close();
     fin.open(wordFile);
 
@@ -214,7 +223,7 @@ int main(int argc, char *argv[]) {
 	}
     
     while(getline(fin, line)){
-        cout << "okay so the word file is open" << endl;
+        //cout << "okay so the word file is open" << endl;
         nodeIndex = ourGraph.minNodes;
         Node *ourSink = new Node();
         ourSink->type = sink;
@@ -235,21 +244,21 @@ int main(int argc, char *argv[]) {
         }
         cout << endl << endl;
         for(int i = 0; i < line.length(); i++){
-            cout << "creating nodes for letters" << endl;
-            Node* aLetter = new Node();
-            cout << "tell me its this stupud node index" << endl;
+            //cout << "creating nodes for letters" << endl;
+            Node *aLetter = new Node();
+            //cout << "tell me its this stupud node index" << endl;
             aLetter->id = nodeIndex;
-            cout << "hmm here?" << endl;
+           // cout << "hmm here?" << endl;
             aLetter->type = word;
             char letter = line[i];
             int diff = letter - 'A';
-            cout << "or here? " << endl;
+            //cout << "or here? " << endl;
             aLetter->letters[diff]=true;
             nodeIndex++;
 
             for(int j = 1; j < ourGraph.minNodes; j++){
                 if(ourGraph.nodes[j]->letters[diff] == true){
-                    cout << "creating edges for words" << endl;
+                    //cout << "creating edges for words" << endl;
                     Edge *toWord = new Edge;
                     toWord->to = aLetter;
                     toWord->from = ourGraph.nodes[j-1];
@@ -267,7 +276,7 @@ int main(int argc, char *argv[]) {
                     aLetter->adj.push_back(toDice);
                 }
             }
-            cout << "I am getting sick of this" << endl;
+            //cout << "I am getting sick of this" << endl;
             Edge *toSink = new Edge;
             toSink->from = aLetter;
             toSink->to = ourSink;
@@ -289,6 +298,20 @@ int main(int argc, char *argv[]) {
         }
         ourSink->id = nodeIndex;
         ourGraph.nodes.push_back(ourSink);
+
+        cout << " ok look here for the graphs after addition" << endl;
+        for(int i = 0; i < ourGraph.nodes.size(); i++){
+            if(ourGraph.nodes[i]->type == dice){
+                for (int j = 0; j < ourGraph.nodes[i]->adj.size(); j++) {
+                    cout << "edge type " << ourGraph.nodes[i]->adj[j]->to->id << endl;
+                    if(ourGraph.nodes[i]->adj[j]->to->type == word){
+                        cout << "edge type: " << ourGraph.nodes[i]->adj[j]->to->type << endl;
+                    // delete nodes[i]->adj[j];
+                    }
+                }   
+                //nodes[i]->adj.clear();
+            }
+        }
 
         //Now I am gonna print out the graph to make sure it looks right
 

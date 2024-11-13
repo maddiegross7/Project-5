@@ -1,0 +1,10 @@
+Cannot spell AGATE
+2,5,3,1,0: YODEL
+5,4,2,0,1: LIMIT
+1,5,3,4,2: TODAY
+Cannot spell BOBBY
+Cannot spell GRATE
+Cannot spell CHILE
+0,1,2,4,3: HUMID
+Cannot spell CIDER
+0,4,2,1,3: LAYUP

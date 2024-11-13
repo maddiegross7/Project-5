@@ -1,0 +1,68 @@
+okay so the word file is open
+Node 0  Edges to 1 2 3 4 5 6 
+Node 1 BEHILV Edges to 0 
+Node 2 ABETUV Edges to 0 
+Node 3 DLMOUY Edges to 0 
+Node 4 DEPQSY Edges to 0 
+Node 5 ACHINS Edges to 0 
+Node 6 KLOPTV Edges to 0 
+
+
+creating nodes for letters
+tell me its this stupud node index
+hmm here?
+or here? 
+creating edges for words
+creating edges for words
+I am getting sick of this
+creating nodes for letters
+tell me its this stupud node index
+hmm here?
+or here? 
+I am getting sick of this
+creating nodes for letters
+tell me its this stupud node index
+hmm here?
+or here? 
+creating edges for words
+creating edges for words
+I am getting sick of this
+creating nodes for letters
+tell me its this stupud node index
+hmm here?
+or here? 
+creating edges for words
+creating edges for words
+I am getting sick of this
+creating nodes for letters
+tell me its this stupud node index
+hmm here?
+or here? 
+creating edges for words
+creating edges for words
+creating edges for words
+I am getting sick of this
+Node 0  Edges to 1 2 3 4 5 6 
+Node 1 BEHILV Edges to 0 11 
+Node 2 ABETUV Edges to 0 7 9 10 11 
+Node 3 DLMOUY Edges to 0 
+Node 4 DEPQSY Edges to 0 11 
+Node 5 ACHINS Edges to 0 7 9 
+Node 6 KLOPTV Edges to 0 10 
+Node 7 A Edges to 2 5 12 
+Node 8 G Edges to 12 
+Node 9 A Edges to 2 5 12 
+Node 10 T Edges to 2 6 12 
+Node 11 E Edges to 1 2 4 12 
+Node 12  Edges to 7 8 9 10 11 
+
+
+we in Can I Spell
+we in the BFS
+BFS = 1
+1 to 11 to 0
+we in the BFS
+BFS = 1
+1 to 7 to 1 to 0
+we in the BFS
+BFS = 1
