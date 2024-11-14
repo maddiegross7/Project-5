@@ -325,9 +325,9 @@ int main(int argc, char *argv[]) {
         ourSink->id = nodeIndex;
         ourGraph.nodes.push_back(ourSink);
 
-        if(wordCount > 0){
-            cout << endl;
-        }
+        // if(wordCount > 0){
+        //     cout << endl;
+        // }
         wordCount++;
         //if the word can be spelled printing out the order of the dice 
         //that is used for each letter in the words
@@ -342,9 +342,9 @@ int main(int argc, char *argv[]) {
                     }
                 }
             }
-            cout << ": " << line;
+            cout << ": " << line << endl;;
         }else{
-            cout << "Cannot spell "  << line;
+            cout << "Cannot spell "  << line << endl;
         }
 
         //after each word has been determined we will delete the part 
